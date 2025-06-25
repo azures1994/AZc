@@ -1,7 +1,13 @@
 #include <iostream>
 #include <algorithm> // std::replace
+
+#ifdef _WIN32
+#include <io.h> // _access
+#include <direct.h> // _mkdir
+#elif __linux__
 #include <unistd.h> // access
 #include <sys/stat.h> // mkdir
+#endif
 
 #include "file.h"
 
@@ -13,6 +19,8 @@ int createDirectory(const std::string& _path){
     std::string path = _path;
 
 #ifdef _WIN32
+    #define ACCESS(path) _access(path, 0)
+    #define MKDIR(path) _mkdir(path)
     const char PATH_SEP = '\\';
     const char N_PATH_SEP = '/';
 #elif __linux__

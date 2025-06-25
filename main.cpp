@@ -4,7 +4,11 @@
 
 int test_file(){
 
+#ifdef _WIN32
+    std::string path = R"(G:\QFile\/temp//20250625//a\b\\c)";
+#elif
     std::string path = "test/a/b//c/d////e\\f/g/";
+#endif
     if(AZc::file::createDirectory(path) != 0){
         printf("createDirectory failed: %s\n", path.c_str());
         return -1;
