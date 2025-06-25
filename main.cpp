@@ -4,7 +4,13 @@
 
 int test_file(){
 
-    AZc::file::mkdir("test");
+    std::string path = "test/a/b//c/d////e\\f/g/";
+    if(AZc::file::createDirectory(path) != 0){
+        printf("createDirectory failed: %s\n", path.c_str());
+        return -1;
+    }else{
+        printf("createDirectory successfully: %s\n", path.c_str());
+    }
 
     return 0;
 }

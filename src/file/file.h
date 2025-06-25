@@ -5,7 +5,7 @@
 namespace AZc{
 namespace file{
 
-int mkdir(const std::string& _path);
+int createDirectory(const std::string& _path);
 
 } // namespace file
 } // namespace AZc
