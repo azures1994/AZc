@@ -7,6 +7,7 @@
 #include <sys/stat.h> // mkdir
 #include <dirent.h> // opendir, readdir, closedir
 #elif _WIN32
+#include <Windows.h>
 #include <io.h> // _access
 #include <direct.h> // _mkdir
 #endif
@@ -55,9 +56,11 @@ int createDirectory(const std::string& _path){
 int searchFiles(std::vector<std::string>& files_, const std::string& rootDir_, const std::string& suffix_, bool recursive_){
 
     std::string rootDir = rootDir_;
-    if(rootDir.back() != '/') rootDir += '/';
 
 #ifdef __linux__
+
+    if (rootDir.back() != '/') rootDir += '/';
+
     DIR* dir;
     struct dirent* entry;
     struct stat statbuf;
@@ -94,7 +97,48 @@ int searchFiles(std::vector<std::string>& files_, const std::string& rootDir_, c
     }
 
     closedir(dir);
+
 #elif _WIN32
+
+    if (rootDir.back() != '\\') rootDir += '\\';
+
+    WIN32_FIND_DATAA findFileData;
+    HANDLE hFind = INVALID_HANDLE_VALUE;
+
+    std::string searchPath = rootDir + "*";
+
+    hFind = FindFirstFileA(searchPath.c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        // DWORD error = GetLastError();
+        printf("FindFirstFileA failed!(%s)\n", searchPath.c_str());
+        return -1;
+    }
+
+    do {
+        if ((strcmp(findFileData.cFileName, ".") == 0) ||
+            (strcmp(findFileData.cFileName, "..") == 0)) {
+            continue;
+        }
+
+        std::string fullPath = rootDir + findFileData.cFileName;
+        if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (recursive_) {
+                int ret = searchFiles(files_, fullPath, suffix_, recursive_);
+                if (ret != 0) {
+                    printf("searchFiles failed!(%s)\n", fullPath.c_str());
+                    continue;
+                }
+            }
+        }else{
+            size_t pos = fullPath.find(suffix_, fullPath.length() - suffix_.length());
+            if (pos != std::string::npos) {
+                files_.push_back(fullPath);
+            }
+
+        }
+    } while (FindNextFileA(hFind, &findFileData) != 0);
+
+    FindClose(hFind);
 
 #endif
 
