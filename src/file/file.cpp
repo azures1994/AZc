@@ -1,12 +1,14 @@
 #include <iostream>
 #include <algorithm> // std::replace
 
-#ifdef _WIN32
+#ifdef __linux__
+#include <unistd.h> // access
+#include <string.h>
+#include <sys/stat.h> // mkdir
+#include <dirent.h> // opendir, readdir, closedir
+#elif _WIN32
 #include <io.h> // _access
 #include <direct.h> // _mkdir
-#elif __linux__
-#include <unistd.h> // access
-#include <sys/stat.h> // mkdir
 #endif
 
 #include "file.h"
@@ -18,17 +20,19 @@ int createDirectory(const std::string& _path){
     printf("--- mkdir %s\n", _path.c_str());
     std::string path = _path;
 
-#ifdef _WIN32
-    #define ACCESS(path) _access(path, 0)
-    #define MKDIR(path) _mkdir(path)
-    const char PATH_SEP = '\\';
-    const char N_PATH_SEP = '/';
-#elif __linux__
+
+#ifdef __linux__
     #define ACCESS(path) access(path, F_OK)
     #define MKDIR(path) mkdir(path, 0777)
     const char PATH_SEP = '/';
     const char N_PATH_SEP = '\\';
+#elif _WIN32
+    #define ACCESS(path) _access(path, 0)
+    #define MKDIR(path) _mkdir(path)
+    const char PATH_SEP = '\\';
+    const char N_PATH_SEP = '/';
 #endif
+
 
     std::replace(path.begin(), path.end(), N_PATH_SEP, PATH_SEP);
 
@@ -44,6 +48,55 @@ int createDirectory(const std::string& _path){
             }
         }
     }
+
+    return 0;
+}
+
+int searchFiles(std::vector<std::string>& files_, const std::string& rootDir_, const std::string& suffix_, bool recursive_){
+
+    std::string rootDir = rootDir_;
+    if(rootDir.back() != '/') rootDir += '/';
+
+#ifdef __linux__
+    DIR* dir;
+    struct dirent* entry;
+    struct stat statbuf;
+    
+    if((dir = opendir(rootDir.c_str())) == NULL){
+        printf("opendir failed!(%s)\n", rootDir.c_str());
+        return -1;
+    }
+
+    while((entry = readdir(dir)) != NULL){
+
+        if((strcmp(entry->d_name, ".") == 0) || (strcmp(entry->d_name, "..") == 0)) continue;
+
+        std::string fullPath = rootDir + entry->d_name;
+        if(stat(fullPath.c_str(), &statbuf) == -1){
+            printf("Error: stat failed!(%s)\n", fullPath.c_str());
+            continue;
+        }
+
+        if(S_ISDIR(statbuf.st_mode)){
+            if(recursive_){
+                int ret = searchFiles(files_, fullPath, suffix_, recursive_);
+                if(ret != 0){
+                    printf("searchFiles failed!(%s)\n", fullPath.c_str());
+                    continue;
+                }
+            }
+        }else if(S_ISREG(statbuf.st_mode)){
+            size_t pos = fullPath.find(suffix_, fullPath.length() - suffix_.length());
+            if(pos != std::string::npos){
+                files_.push_back(fullPath);
+            }
+        }
+    }
+
+    closedir(dir);
+#elif _WIN32
+
+#endif
 
     return 0;
 }
