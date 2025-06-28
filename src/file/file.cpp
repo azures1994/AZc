@@ -7,7 +7,7 @@
 #include <sys/stat.h> // mkdir
 #include <dirent.h> // opendir, readdir, closedir
 #elif _WIN32
-#include <Windows.h>
+#include <Windows.h> // FindFirstFileA, FindNextFileA, FindClose
 #include <io.h> // _access
 #include <direct.h> // _mkdir
 #endif

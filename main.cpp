@@ -5,17 +5,17 @@
 int test_file(){
 
 printf("\n#######################1. AZc::file::createDirectory #######################\n");
-// #ifdef _WIN32
-//     std::string path = R"(G:\QFile\/temp//20250625//a\b\\c)";
-// #elif  __linux__
-//     std::string path = "test/a/b//c/d////e\\f/g/";
-// #endif
-//     if(AZc::file::createDirectory(path) != 0){
-//         printf("createDirectory failed: %s\n", path.c_str());
-//         return -1;
-//     }else{
-//         printf("createDirectory successfully: %s\n", path.c_str());
-//     }
+#ifdef _WIN32
+    std::string path = R"(G:\QFile\/temp//20250625//a\b\\c)";
+#elif  __linux__
+    std::string path = "test/a/b//c/d////e\\f/g/";
+#endif
+    if(AZc::file::createDirectory(path) != 0){
+        printf("createDirectory failed: %s\n", path.c_str());
+        return -1;
+    }else{
+        printf("createDirectory successfully: %s\n", path.c_str());
+    }
 
 printf("\n#######################2. AZc::file::searchFiles ###########################\n");
 
