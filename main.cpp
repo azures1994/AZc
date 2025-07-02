@@ -45,10 +45,21 @@ printf("\n#######################2. AZc::file::searchFiles #####################
     return 0;
 }
 
+int test_cv(){ 
+
+    AZc::cv::Rect rect1(0, 0, 100, 100);
+    AZc::cv::Rect rect2(50, 50, 50, 50);
+    float iou = AZc::cv::clacIOU(rect1, rect2);
+    printf("iou: %.2f\n", iou);
+
+    return 0;
+}
 int main(int, char**){
     std::cout << "Hello, from AZc!\n";
 
-    test_file();
+    // test_file();
+
+    test_cv();
 
     return 0;
 }

@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(AZc VERSION 0.1.0 LANGUAGES C CXX)
+project(AZc_main VERSION 0.1.0 LANGUAGES C CXX)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/)
 
-include_directories(src/)
-add_subdirectory(src/file/)
+add_subdirectory(src/)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} file)
+target_link_libraries(${PROJECT_NAME} AZc)
 
 include(CTest)
 enable_testing()
